@@ -1,0 +1,190 @@
+<!--
+/*******************************************************************************
+* Copyright (C) 2017 Orange.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+*     Rombit - initial implementation
+*
+* Based on https://github.com/node-red/node-red-web-nodes
+******************************************************************************/
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+-->
+
+<script type="text/x-red" data-template-name="google-credentials" data-lang="en-US">
+    <div id="node-config-google-client-keys">
+        <div class="form-row">
+            <p style="margin-top: 10px;"><b>1.</b> <span data-i18n="google.label.create"></span> <a href="https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication" target="_blank" style="text-decoration:underline;"><span data-i18n="google.label.instructions"></span></a></p>
+        </div>
+        <div class="form-tips" id="node-config-google-tooltip">
+        </div>
+        <div class="form-row">
+            <p style="margin-top: 10px;"><b>2.</b> <span data-i18n="google.label.copy"></span>:</p>
+        </div>
+        <div class="form-row">
+            <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-clientId"><i class="fa fa-user"></i> <span data-i18n="google.label.clientid"></span></label>
+            <input type="password" id="node-config-input-clientId">
+        </div>
+        <div class="form-row">
+            <label style="margin-left: 10px; margin-right: -10px;" for="node-config-input-clientSecret"><i class="fa fa-key"></i> <span data-i18n="google.label.secret"></span></label>
+            <input type="password" id="node-config-input-clientSecret">
+        </div>
+        <div class="form-row">
+           <label>&nbsp;</label>
+           <a class="btn" id="node-config-start-auth" href="#" target="_blank"><span data-i18n="google.label.authenticate"></span></a>
+        </div>
+    </div>
+    <div id="node-config-google">
+        <div class="form-row">
+            <label><i class="fa fa-user"></i> <span data-i18n="google.label.googleuser"></span></label><span id="node-config-google-displayName" class="input-xlarge uneditable-input"></span>
+        </div>
+        <input type="hidden" id="node-config-input-displayName">
+    </div>
+</script>
+
+<script type="text/javascript" data-lang="en-US">
+(function() {
+    RED.nodes.registerType('google-credentials',{
+        category: 'config',
+        defaults: {
+            displayName: {value:""}
+        },
+        credentials: {
+            displayName: {type:"text"},
+            clientId: { type: "password"},
+            clientSecret: { type: "password"}
+        },
+        label: function() {
+            return this.displayName || this._("google.label.google"); // TODO: fix this
+        },
+        exportable: false,
+        oneditprepare: function() {
+            var id = this.id;
+            var pathname = document.location.pathname;
+            if (pathname.slice(-1) != "/") {
+                pathname += "/";
+            }
+            
+            var privateIPRegex = /(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^192\.168\.)/;
+            var callback;
+            var tip;
+            if(privateIPRegex.test(location.hostname)) { // if private IP has been detected
+                var dummyDomain = "node-red.example.com";
+                var actualIP = location.hostname;
+                callback = location.protocol + "//" +
+                           dummyDomain +
+                           (location.port?":"+location.port:"")+
+                           pathname + "google-credentials/auth/callback";
+                tip = this._("google.tip.privateip", {callback: callback, dummyDomain: dummyDomain, actualIP: actualIP});
+                $("#node-config-google-tooltip").html(tip);
+            } else {
+                callback = location.protocol + "//" +
+                           location.hostname +
+                           (location.port?":"+location.port:"")+
+                           pathname + "google-credentials/auth/callback";
+                tip = this._("google.tip.configure", {callback: callback});
+                $("#node-config-google-tooltip").html(tip);
+            }
+
+            function updateGoogleAuthButton() {
+                var v1 = $("#node-config-input-clientId").val();
+                var v2 = $("#node-config-input-clientSecret").val();
+                $("#node-config-start-auth").toggleClass("disabled",(v1.length === 0 || v2.length === 0));
+            }
+            $("#node-config-input-clientId").on('change keydown paste input',updateGoogleAuthButton);
+            $("#node-config-input-clientSecret").on('change keydown paste input',updateGoogleAuthButton);
+
+            function updateGoogleDisplayName(dn) {
+                $("#node-config-google-client-keys").hide();
+                $("#node-config-google").show();
+                $("#node-config-input-displayName").val(dn);
+                $("#node-config-google-displayName").html(dn);
+            }
+
+            function pollGoogleCredentials() {
+                $.getJSON('credentials/google-credentials/'+id,function(data) {
+                    if (data.displayName) {
+                        $("#node-config-dialog-ok").button("enable");
+                        updateGoogleDisplayName(data.displayName);
+                        delete window.googleConfigNodeIntervalId;
+                    } else {
+                        window.googleConfigNodeIntervalId = window.setTimeout(pollGoogleCredentials,2000);
+                    }
+                });
+             }
+
+            updateGoogleAuthButton();
+
+            if (this.displayName) {
+                updateGoogleDisplayName(this.displayName);
+            } else {
+                $("#node-config-google-client-keys").show();
+                $("#node-config-google").hide();
+                $("#node-config-dialog-ok").button("disable");
+            }
+
+            $("#node-config-start-auth").mousedown(function() {
+                var clientId = $("#node-config-input-clientId").val();
+                var clientSecret = $("#node-config-input-clientSecret").val();
+                var url = 'google-credentials/auth?id='+id+'&clientId='+clientId+"&clientSecret="+clientSecret+"&callback="+encodeURIComponent(callback);
+                $(this).attr("href",url);
+                window.googleConfigNodeIntervalId = window.setTimeout(pollGoogleCredentials,2000);
+            });
+            $("#node-config-start-auth").click(function(e) {
+                var clientId = $("#node-config-input-clientId").val();
+                var clientSecret = $("#node-config-input-clientSecret").val();
+                if (clientId === "" || clientSecret === "") {
+                    e.preventDefault();
+                }
+            });
+        },
+        oneditsave: function() {
+            if (window.googleConfigNodeIntervalId) {
+                window.clearTimeout(window.googleConfigNodeIntervalId);
+                delete window.googleConfigNodeIntervalId;
+            }
+        },
+        oneditcancel: function() {
+            if (window.googleConfigNodeIntervalId) {
+                window.clearTimeout(window.googleConfigNodeIntervalId);
+                delete window.googleConfigNodeIntervalId;
+            }
+        }
+    });
+})();
+</script>
+
+<script type="text/x-red" data-template-name="google-api-config" data-lang="en-US">
+    <div class="form-row">
+        <label for="node-config-input-key"><i class="fa fa-bookmark"></i><span data-i18n="google.label.apikey"></span></label>
+        <input class="input-append-left" type="password" id="node-config-input-key" style="width: 40%;" >
+    </div>
+    <div class="form-tips">
+        <span data-i18n="[html]google.tip.api1"></span>
+        <span data-i18n="[html]google.tip.api2"></span>
+        <span data-i18n="[html]google.tip.api3"></span>
+    </div>
+</script>
+
+<script type="text/javascript" data-lang="en-US">
+(function() {
+    RED.nodes.registerType('google-api-config',{
+        category: 'config',
+        defaults: { },
+        credentials: {
+            key: {type: "password",required:true},
+        },
+        label: function() {
+            return this._("google.label.googleapi");
+        },
+        exportable: false,
+    });
+})();
+</script>

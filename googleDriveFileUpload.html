@@ -1,0 +1,117 @@
+<!--
+/*******************************************************************************
+* Copyright (C) 2017 Orange.
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+*     Rombit - initial implementation
+*
+******************************************************************************/
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+-->
+
+<script type="text/javascript" data-lang="en-US">
+
+    RED.nodes.registerType('agile-GDrive-upload',{
+        category: 'googleDrive',
+        color: '#e2d96e',
+        defaults: {
+            google: {type:"google-credentials",required:true},
+            name: {value:""},
+            driveFolder: {value: ""},
+            driveFolderId: {value: ""}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "white-globe.png",
+        label: function() {
+            return this.name||"agile Google Drive upload";
+        },
+        oneditprepare: function() {
+            var node = this;
+            try {
+                $("#node-input-driveFolder").autocomplete( "destroy" );
+                $("#node-input-driveFolderId").autocomplete( "destroy" );
+
+            } catch(err) {
+            }
+
+            $("#node-googleDrive-lookup-folder").click(function() {
+                $("#node-googleDrive-lookup-folder").addClass('disabled');
+                $.getJSON('folders',{googleNodeId: node.google},function(data) {
+                    $("#node-googleDrive-lookup-folder").removeClass('disabled');
+                    var folders = [];
+                    var folderIds = [];
+                    $.each(data, function(i, folder) {
+                        folders.push({label:folder.name, id: folder.id});
+                        folderIds.push(folder.id);
+                    });
+                    $("#node-input-driveFolder").autocomplete({
+                        source:folders,
+                        minLength:0,
+                        close: function( event, ui ) {
+                            $("#node-input-driveFolder").autocomplete( "destroy" );
+                        },
+                        select: function( event, ui ) {
+                            $("#node-input-driveFolderId").val(ui.item.id)
+                        }
+                    }).autocomplete("search","");
+                });
+            });
+        },
+        oneditsave: function() {
+            this.driveFolder = $("#node-input-driveFolderId").val();
+        }
+
+    });
+
+</script>
+
+<script type="text/x-red" data-template-name="agile-GDrive-upload" data-lang="en-US">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="googleDriveFileUpload.label.name"></span></label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-google"><i class="fa fa-user"></i> <span data-i18n="googleDriveFileUpload.label.googleId"></span></label>
+        <input type="text" id="node-input-google">
+    </div>
+     <div class="form-row">
+        <label for="node-input-driveFolder"><i class="fa fa-folder"></i> <span data-i18n="googleDriveFileUpload.label.folder"></span></label>
+        <input readonly type="text" id="node-input-driveFolder" style="width:60%;" data-i18n="[placeholder]googleDriveFileUpload.label.folder">
+        <a id="node-googleDrive-lookup-folder" class="btn"><i id="node-googleDrive-lookup-folder-icon" class="fa fa-search"></i></a>
+        <input type="hidden" id="node-input-driveFolderId">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="agile-GDrive-upload" data-lang="en-US">
+
+    <p>A node to upload files to the google drive API. </p>
+    <h1>Instructions</h1>
+    <h2>Configuration</h2>
+    <ul>
+        <li>1. Edit the node and add a Google Id, follow the instructions of the config node.</li>
+        <li>2. Add the google ID, click on done for the node config and deploy the flow.</li>
+        <li>3. Edit the node again, now you can browse the root folder list of your google Drive.</li>
+    </ul>
+    <h2>Upload a file</h2>
+    <p>Connect a node with the following output</p>
+    <p>msg.payload: The text content of the file upload</p>
+    <p>msg.localpath: The local file path of the file to upload</p>
+    <p>Either the payload or the localpath are required. The payload has a higher priority as the localpath</p>
+
+
+    <h1>Remarks</h1>
+    <ul>
+        <li>If the google callback returns that the profile fetching failed, you need to enable the google+ api in console.developers.google.com</li>
+        <li>Check in the console.developers.google.com dashboard that the google+ API and google Drive API are active.</li>
+    </ul>
+    <p>Version1.0</p>
+</script>

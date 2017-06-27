@@ -1,0 +1,31 @@
+{
+    "googleDriveFileUpload": {
+        "label": {
+            "google": "Google",
+            "googleId": "Google ID",
+            "folder": "Remote Path",
+            "name": "Name"
+        },
+        "status": {
+            "querying": "Querying",
+            "creating": "Creating",
+            "failed": "Failed",
+            "file-not-found":"File not found",
+            "waiting-for-file": "Waiting for file",
+            "error-uploading": "Error occurred during upload"
+        },
+        "warn": {
+            "no-credentials": "Missing google credentials",
+            "no-file-content": "File Content missing",
+            "no-file-content-long": "File Content missing, please add msg.localpath or msg.payload"
+        },
+        "error": {
+            "error": "Error: __error__",
+            "fetch-failed": "Failed to fetch drive: __message__",
+            "fetch-unauthorized": "Unauthorized to fetch drive",
+            "error-details": "Error __code__: __message__",
+            "failed-read-file": "Failed to read file",
+            "google-drive-error": "Google drive error"
+        }
+    }
+}

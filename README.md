@@ -1,0 +1,22 @@
+# node-red-contrib-agile-googledrive
+
+<p>A node to upload files to the google drive API. </p>
+<h1>Instructions</h1>
+<h2>Configuration</h2>
+<ul>
+    <li>1. Edit the node and add a Google Id, follow the instructions of the config node.</li>
+    <li>2. Add the google ID, click on done for the node config and deploy the flow.</li>
+    <li>3. Edit the node again, now you can browse the root folder list of your google Drive.</li>
+</ul>
+<h2>Upload a file</h2>
+<p>Connect a node with the following output</p>
+<p>msg.payload: The text content of the file upload</p>
+<p>msg.localpath: The local file path of the file to upload</p>
+<p>Either the payload or the localpath are required. The payload has a higher priority as the localpath</p>
+
+<h1>Remarks</h1>
+
+<ul>
+    <li>If the google callback returns that the profile fetching failed, you need to enable the google+ api in console.developers.google.com</li>
+    <li>Check in the console.developers.google.com dashboard that the google+ API and google Drive API are active.</li>
+</ul>
