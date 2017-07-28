@@ -1,14 +1,12 @@
 /*******************************************************************************
- * Copyright (C) 2017 Orange.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *Copyright (C) 2017 ROMBIT.
+ *All rights reserved. This program and the accompanying materials
+ *are made available under the terms of the Eclipse Public License v1.0
+ *which accompanies this distribution, and is available at
+ *http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     Rombit - initial implementation
- *
- * Based on https://github.com/node-red/node-red-web-nodes
+ *Contributors:
+ *    ROMBIT - initial API and implementation
  ******************************************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
