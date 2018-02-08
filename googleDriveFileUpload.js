@@ -17,7 +17,6 @@
 const path = require('path');
 var fs = require('fs');
 var google = require('googleapis');
-var d = require('debug')('GoogleDriveGFileUpload');
 var dateFormat = require('dateformat');
 
 // var scopes = [
@@ -40,10 +39,11 @@ module.exports = function (RED) {
         node.driveFolderId = config.driveFolderId;
         this.google = RED.nodes.getNode(config.google);
         if (!this.google || !this.google.credentials.accessToken) {
-            d(RED._("googleDriveFileUpload.warn.no-credentials"));
+            node.send({status:"error", data:RED._('googleDriveFileUpload.warn.no-credentials')});
             node.status({fill: "red", shape: "dot", text: "googleDriveFileUpload.warn.no-credentials"});
             return;
         } else {
+            node.send({status:"ready", data:RED._('ownCloudFileUpload.status.waiting-for-file')});
             node.status({fill: "blue", shape: "dot", text: "googleDriveFileUpload.status.waiting-for-file"});
         }
         node.status({
@@ -66,14 +66,14 @@ module.exports = function (RED) {
                 if (uploadFileBool) {
                     fs.readFile(localpath, 'utf8', function (err, file) {
                         if (err) {
-                            d(RED._('googleDriveFileUpload.error.failed-read-file: ') + err.toString());
+                            node.send({status:"error", data:RED._('googleDriveFileUpload.error.failed-read-file: ') + err.toString()});
                             return;
                         }
                         uploadConfig.uploadContent = file.toString();
                         uploadConfig.uploadFileName = path.basename(localpath);
                         uploadToDrive(uploadConfig, node, function (err) {
                             if (err) {
-                                node.error(err);
+                                node.send({status:"error", data:RED._('googleDriveFileUpload.status.error-uploading')});
                                 node.status({
                                     fill: "red",
                                     shape: "ring",
@@ -81,6 +81,7 @@ module.exports = function (RED) {
                                 });
                                 return;
                             }
+                            node.send({status:"ready", data:RED._('googleDriveFileUpload.status.waiting-for-file')});
                             node.status({
                                 fill: "blue",
                                 shape: "dot",
@@ -91,7 +92,7 @@ module.exports = function (RED) {
                 } else {
                     uploadToDrive(uploadConfig, node, function (err) {
                         if (err) {
-                            node.error(err);
+                            node.send({status:"error", data:RED._('googleDriveFileUpload.status.error-uploading')});
                             node.status({
                                 fill: "red",
                                 shape: "ring",
@@ -99,6 +100,7 @@ module.exports = function (RED) {
                             });
                             return;
                         }
+                        node.send({status:"ready", data:RED._('googleDriveFileUpload.status.waiting-for-file')});
                         node.status({
                             fill: "blue",
                             shape: "dot",
@@ -107,7 +109,7 @@ module.exports = function (RED) {
                     });
                 }
             } else {
-                d(RED._('googleDriveFileUpload.warn.no-file-content-long'));
+                node.send({status:"error", data:RED._('googleDriveFileUpload.warn.no-file-content')});
                 node.status({fill: "red", shape: "ring", text: "googleDriveFileUpload.warn.no-file-content"});
             }
         });
@@ -122,12 +124,10 @@ module.exports = function (RED) {
             };
             node.google.request(req, function (err, data) {
                 if (err) {
-                    d(RED._('googleDriveFileUpload.status.google-drive-error') + ': ' + err.toString());
                     cb(RED._("googleDriveFileUpload.error.fetch-failed", {message: err.toString()}));
                     return;
                 }
                 if (data.error) {
-                    d(RED._('googleDriveFileUpload.status.google-drive-error'));
                     cb(RED._("googleDriveFileUpload.error.fetch-failed", {message: data.error.message}));
                 }
                 cb(data);
@@ -159,12 +159,10 @@ module.exports = function (RED) {
             };
             node.google.request(req, function (err, data) {
                 if (err) {
-                    d(RED._('googleDriveFileUpload.status.google-drive-error') + ': ' + err.toString());
                     cb(RED._("googleDriveFileUpload.error.fetch-failed", {message: err.toString()}));
                     return;
                 }
                 if (data.error) {
-                    d(RED._('googleDriveFileUpload.status.google-drive-error'));
                     cb(RED._("googleDriveFileUpload.error.fetch-failed", {message: data.error.message}));
                     return;
                 }
@@ -183,10 +181,12 @@ module.exports = function (RED) {
                     data["files"].forEach(function (data) {
                         folders.push({name: data.name, id: data.id});
                     });
+                    node.send({status:"ready", data:RED._('ownCloudFileUpload.status.waiting-for-file')});
                     node.status({fill: "blue", shape: "dot", text: "googleDriveFileUpload.status.waiting-for-file"});
                     res.json(folders);
                 });
             } else {
+                node.send({status:"error", data:RED._('googleDriveFileUpload.error.fetch-unauthorized')});
                 res.json(404, {
                     msg: RED._("googleDriveFileUpload.error.fetch-unauthorized")
                 });

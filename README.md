@@ -12,6 +12,9 @@
 # node-red-contrib-agile-googledrive
 
 <p>A node to upload files to the google drive API. </p>
+
+<b>Important: This the google drive authorization only works on localhost and public domains
+
 <h1>Instructions</h1>
 <h2>Configuration</h2>
 <ul>
@@ -31,3 +34,9 @@
     <li>If the google callback returns that the profile fetching failed, you need to enable the google+ api in console.developers.google.com</li>
     <li>Check in the console.developers.google.com dashboard that the google+ API and google Drive API are active.</li>
 </ul>
+
+changelog:
+
+v1.0.1: Added an output to the node with status messages.
+
+v1.0.0: init
