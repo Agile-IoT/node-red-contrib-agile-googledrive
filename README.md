@@ -13,7 +13,7 @@
 
 <p>A node to upload files to the google drive API. </p>
 
-<b>Important: This the google drive authorization only works on localhost and public domains
+<b>Important: This the google drive authorization only works on localhost and public domains. The current agile-os implementation is not supported by Google</b>
 
 <h1>Instructions</h1>
 <h2>Configuration</h2>
