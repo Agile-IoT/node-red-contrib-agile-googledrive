@@ -1,18 +1,15 @@
 /*******************************************************************************
- *Copyright (C) 2017 Orange.
- *All rights reserved. This program and the accompanying materials
- *are made available under the terms of the Eclipse Public License v1.0
- *which accompanies this distribution, and is available at
- *http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (C) 2018 Orange.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
  *
- *Contributors:
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
  *    Rombit - initial API and implementation
  ******************************************************************************/
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 const path = require('path');
 var fs = require('fs');

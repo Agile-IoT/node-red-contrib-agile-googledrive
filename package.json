@@ -15,7 +15,7 @@
     "google"
   ],
   "author": "Brett Daman <brett@rombit.be>",
-  "license": "EPL-1.0",
+  "license": "EPL-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Agile-IoT/node-red-contrib-agile-googledrive"
